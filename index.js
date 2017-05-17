@@ -89,17 +89,20 @@ function HttpResponseHandler(context, event) {
 }
 
 function DbGetHandler(context, event) {
-    
-    var databaseValue = JSON.parse(event.dbval);
-    var currentState = databaseValue.currentState;
+
+    var databaseValue;
+    if(event.dbval != "") {
+      databaseValue = JSON.parse(event.dbval);
+      var currentState = databaseValue.currentState;
+    }
+
     var randomeState;
-    
+        
     if(context.request.toLowerCase().includes("score")) {
         var numberCorrect = countNumberOfCorrectlyAnswered(databaseValue.userState);
         var haveNotYetAnsweredCorrectly = countNumberOfNotCorrectlyAnswered(databaseValue.userState);
-        context.sendResponse("Okay, new quiz. "
-            + "You have answered " + numberCorrect + " correctly!"
-            + "You have " + haveNotYetAnsweredCorrectly + " to answer correctly");
+        context.sendResponse("You have answered " + numberCorrect + " correctly! "
+            + "You have " + haveNotYetAnsweredCorrectly + " left to answer correctly");
     } else if(context.request.toLowerCase().includes("reset")) {
         context.sendResponse("Okay, new quiz. "
             + "What is the state capital for Texas?");
@@ -107,10 +110,13 @@ function DbGetHandler(context, event) {
         randomState = "Texas";
         databaseValue.userState = createUserState();
     } else if(context.request.toLowerCase().includes("state capital quiz") && databaseValue) {
+                    
         randomeState = getRandomStateThatUserHasNotGottenCorrect(databaseValue.userState)
+
         context.sendResponse("Hi, Welcome back to State Capital Quiz! "
             + "You have already answered " + countNumberOfCorrectlyAnswered(databaseValue.userState) + " correctly. "
             + "What is the state capital for " + randomeState + "?");
+        
     } else if(context.request.toLowerCase().includes("state capital quiz")) {
         context.sendResponse("Welcome to State Capital Quiz! "
             + "To play, I will give you a state, you give the capital city. "
@@ -118,6 +124,7 @@ function DbGetHandler(context, event) {
             + "What is the state capital for Texas?");
         var userData = {};
         randomState = "Texas";
+        databaseValue = {};
         databaseValue.userState = createUserState();
     } else if (stateToCapital[currentState].toLowerCase().includes(context.request.toLowerCase())) {
         databaseValue.userState[currentState].correct += 1;
@@ -139,6 +146,7 @@ function DbGetHandler(context, event) {
         context.sendResponse("The correct city is: " + stateToCapital[currentState] + ". "
            + "What is the state capital for " +  randomState); 
     } else {
+             
        databaseValue.userState[currentState].incorrect += 1;
        randomState = getRandomStateThatUserHasNotGottenCorrect(databaseValue.userState);
        context.sendResponse( "Sorry, that is not the correct city. "
@@ -146,7 +154,7 @@ function DbGetHandler(context, event) {
            + "What is the state capital for " +  randomState); 
     }
     databaseValue.currentState = randomState;
-    console.log(JSON.stringify(databaseValue))
+    //console.log(JSON.stringify(databaseValue))
     context.simpledb.doPut(context.sender, JSON.stringify(databaseValue));
 }
 
