@@ -111,7 +111,7 @@ function DbGetHandler(context, event) {
         databaseValue.userState = createUserState();
     } else if(context.request.toLowerCase().includes("state capital quiz") && databaseValue) {
                     
-        randomeState = getRandomStateThatUserHasNotGottenCorrect(databaseValue.userState)
+        randomeState = getRandomStateThatUserHasNotGottenCorrect(databaseValue.userState);
 
         context.sendResponse("Hi, Welcome back to State Capital Quiz! "
             + "You have already answered " + countNumberOfCorrectlyAnswered(databaseValue.userState) + " correctly. "
